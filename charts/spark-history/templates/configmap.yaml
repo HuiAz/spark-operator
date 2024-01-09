@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configMap.name }}
+  labels:
+    {{- include "spark-history.labels" . | nindent 4 }}
+data:
+{{- range $path, $config := .Values.sparkConfigMap }}
+  {{ $path }}: |
+{{ $config | indent 4 -}}
+{{- end -}}

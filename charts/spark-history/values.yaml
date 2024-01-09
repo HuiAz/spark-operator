@@ -1,0 +1,114 @@
+# Default values for spark-history.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: registry.cn-hangzhou.aliyuncs.com/publicliuyi/spark-history
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: v1beta2-1.3.8-3.1.1-cos
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+
+
+service:
+  type: NodePort
+  port: 18080
+
+configMap:
+  # The name of the ConfigMap containing the spark-defaults.conf file.
+  name: spark-history
+  # The key of the ConfigMap containing the spark-defaults.conf file.
+  key: spark-defaults.conf
+
+sparkConfigMap:
+  spark-defaults.conf: |
+    spark.hadoop.fs.cosn.impl: org.apache.hadoop.fs.CosFileSystem
+    spark.hadoop.fs.AbstractFileSystem.cosn.impl: org.apache.hadoop.fs.CosN
+    spark.hadoop.fs.cosn.credentials.provider: org.apache.hadoop.fs.auth.SimpleCredentialProvider
+    spark.hadoop.fs.cosn.userinfo.secretId: xxxxxxxxxxxxxxxxxxxx
+    spark.hadoop.fs.cosn.userinfo.secretKey: xxxxxxxxxxxxxxxxxxxxx
+    spark.hadoop.fs.cosn.bucket.region: ap-shanghai
+    spark.eventLog.enabled: true
+    spark.eventLog.dir: cosn://xxxxxxxxx/spark-history
+    spark.history.ui.port: 18080
+    spark.history.fs.logDirectory: cosn://xxxxxxxxxxxxxxxx/spark-history
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# Additional volumes on the output Deployment definition.
+volumes:
+  - name: spark-history
+    configMap:
+      name: spark-history
+      items:
+        - key: spark-defaults.conf
+          path: spark-defaults.conf
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts:
+  - name: spark-history
+    mountPath: "/opt/spark/conf/spark-defaults.conf"
+    subPath: "spark-defaults.conf"
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
