@@ -19,3 +19,7 @@
 
 # Go workspace file
 go.work
+/charts/spark-history/.helmignore
+/charts/spark-operator-chart/.helmignore
+/charts/spark-operator-chart/templates/_helpers.tpl
+/charts/spark-history/templates/_helpers.tpl
