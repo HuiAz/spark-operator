@@ -3,7 +3,9 @@ FROM apache/spark-py:v3.1.3
 USER root
 COPY spark/sources.list /etc/apt/sources.list
 COPY spark/*.jar /opt/spark/jars/
-RUN apt update && apt install -y vim telnet iputils-ping net-tools wget curl && \
+RUN apt-get update && \
+    apt-get install -y vim telnet iputils-ping net-tools wget curl && \
+    apt-get clean && \
     rm -f /opt/spark/jars/httpclient-4.5.6.jar && \
     groupadd -g 185 spark && \
     useradd -u 185 -g 185 spark && \
